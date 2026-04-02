@@ -16,4 +16,7 @@ public class Comment {
     private String content;
     private Instant createdAt;
     private Instant updatedAt;
+    private boolean flaggedForReview;
+    private String moderationReason;
+    private String aiReply;
 }

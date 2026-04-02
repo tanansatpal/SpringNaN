@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import com.example.demo.dto.CommentModerationResult;
 import com.example.demo.dto.CommentRequest;
 import com.example.demo.dto.CommentResponse;
 import com.example.demo.entity.Comment;
@@ -21,24 +22,33 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final ClaudeService claudeService;
 
-    public CommentService(CommentRepository commentRepository, UserRepository userRepository) {
+    public CommentService(CommentRepository commentRepository, UserRepository userRepository, ClaudeService claudeService) {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
+        this.claudeService = claudeService;
     }
 
     public CommentResponse create(CommentRequest request, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
         log.info("Creating comment for userId={}", currentUser.getId());
 
+        CommentModerationResult moderationResult = claudeService.moderateAndReply(request.content());
+
         Comment comment = new Comment();
         comment.setUserId(currentUser.getId());
         comment.setContent(request.content());
         comment.setCreatedAt(Instant.now());
         comment.setUpdatedAt(Instant.now());
+        comment.setFlaggedForReview(moderationResult.negative());
+        comment.setModerationReason(moderationResult.reason());
+        comment.setAiReply(moderationResult.reply());
 
         Comment saved = commentRepository.save(comment);
-        log.info("Comment created successfully: commentId={} userId={}", saved.getId(), saved.getUserId());
+        log.info("Comment created successfully: commentId={} userId={} flaggedForReview={}",
+                saved.getId(), saved.getUserId(), saved.isFlaggedForReview());
+
         return toResponse(saved);
     }
 
@@ -129,7 +139,10 @@ public class CommentService {
                 comment.getUserId(),
                 comment.getContent(),
                 comment.getCreatedAt(),
-                comment.getUpdatedAt()
+                comment.getUpdatedAt(),
+                comment.isFlaggedForReview(),
+                comment.getModerationReason(),
+                comment.getAiReply()
         );
     }
 }

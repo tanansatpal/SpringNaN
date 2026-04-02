@@ -7,6 +7,9 @@ public record CommentResponse(
         String userId,
         String content,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        boolean flaggedForReview,
+        String moderationReason,
+        String aiReply
 ) {
 }
