@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  app:
+    image: maven:3.9.14-eclipse-temurin-21
+    container_name: demo1-app
+    working_dir: /workspace
+    command: mvn spring-boot:run
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/workspace
+      - m2_cache:/root/.m2
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/demo1
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/demo1
+      SPRING_DATASOURCE_USERNAME: demo1
+      SPRING_DATASOURCE_PASSWORD: demo1
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DEVTOOLS_LIVE_RELOAD_ENABLED: "true"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - demo-net
+
+  mongo:
+    image: mongo:7.0
+    container_name: demo1-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "mongodb://localhost:27017/demo1", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - demo-net
+
+  postgres:
+    image: postgres:16
+    container_name: demo1-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: demo1
+      POSTGRES_USER: demo1
+      POSTGRES_PASSWORD: demo1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo1 -d demo1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - demo-net
+
+volumes:
+  mongo_data:
+  postgres_data:
+  m2_cache:
+
+networks:
+  demo-net:
+    driver: bridge
