@@ -6,7 +6,6 @@ import com.example.demo.dto.CommentResponse;
 import com.example.demo.entity.Comment;
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -21,12 +20,10 @@ public class CommentService {
     private static final Logger log = LoggerFactory.getLogger(CommentService.class);
 
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
     private final ClaudeService claudeService;
 
-    public CommentService(CommentRepository commentRepository, UserRepository userRepository, ClaudeService claudeService) {
+    public CommentService(CommentRepository commentRepository, ClaudeService claudeService) {
         this.commentRepository = commentRepository;
-        this.userRepository = userRepository;
         this.claudeService = claudeService;
     }
 
