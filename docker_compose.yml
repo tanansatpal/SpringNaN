@@ -18,11 +18,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: demo1
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
       SPRING_DEVTOOLS_LIVE_RELOAD_ENABLED: "true"
+      APP_CLAUDE_API_KEY: ${CLAUDE_API_KEY}
     depends_on:
-      mongo:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+      - mongo
+      - postgres
     networks:
       - demo-net
 
