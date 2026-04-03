@@ -32,7 +32,7 @@ class RedisServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         redisService = new RedisService(redisTemplate, objectMapper);
     }
 
@@ -87,7 +87,6 @@ class RedisServiceTest {
         assertNull(result);
     }
 
-    @Disabled
     @Test
     void delete_shouldRemoveKey() {
         redisService.delete("weather_john");
